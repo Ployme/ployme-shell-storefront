@@ -3,58 +3,49 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 
-const GRADIENT_PALETTES = [
-  { bg: "from-olive to-olive-dark", text: "text-cream" },
-  { bg: "from-terracotta to-terracotta/80", text: "text-cream" },
-  { bg: "from-stone to-ink/90", text: "text-cream" },
-  { bg: "from-cream to-stone", text: "text-ink" },
-  { bg: "from-olive to-terracotta/70", text: "text-cream" },
-  { bg: "from-olive-dark to-cream/90", text: "text-ink" },
+const GRADIENTS = [
+  // a) Deep olive
+  "linear-gradient(135deg, #3D4A2A 0%, #2C3A1E 100%)",
+  // b) Terracotta
+  "linear-gradient(135deg, #B8472A 0%, #8A3420 100%)",
+  // c) Ink-to-olive
+  "linear-gradient(135deg, #1F1F1A 0%, #3D4A2A 100%)",
+  // d) Stone-to-ink
+  "linear-gradient(135deg, #A8A193 0%, #1F1F1A 100%)",
+  // e) Olive-to-terracotta
+  "linear-gradient(135deg, #3D4A2A 0%, #B8472A 100%)",
 ];
 
 function hashName(name: string): number {
-  let hash = 0;
+  let h = 0;
   for (let i = 0; i < name.length; i++) {
-    hash = (hash * 31 + name.charCodeAt(i)) | 0;
+    h = h + name.charCodeAt(i) * (i + 1);
   }
-  return Math.abs(hash);
+  return h;
 }
 
 function Fallback({
   productName,
   collectionName,
   className,
-  palette,
+  gradient,
 }: {
   productName: string;
   collectionName?: string;
   className?: string;
-  palette: (typeof GRADIENT_PALETTES)[number];
+  gradient: string;
 }) {
   return (
     <div
-      className={cn(
-        "relative flex flex-col justify-between bg-gradient-to-br",
-        palette.bg,
-        className
-      )}
+      className={cn("relative flex flex-col justify-between", className)}
+      style={{ background: gradient }}
     >
       {collectionName && (
-        <span
-          className={cn(
-            "p-5 text-[10px] font-medium uppercase tracking-[0.2em] opacity-60",
-            palette.text
-          )}
-        >
+        <span className="p-5 text-[10px] font-medium uppercase tracking-[0.2em] text-cream/60">
           {collectionName}
         </span>
       )}
-      <span
-        className={cn(
-          "p-6 font-display text-2xl italic leading-tight lg:text-3xl",
-          palette.text
-        )}
-      >
+      <span className="p-6 font-display text-2xl italic leading-tight text-cream lg:text-3xl">
         {productName}
       </span>
     </div>
@@ -77,7 +68,7 @@ export function ProductImage({
   className?: string;
 }) {
   const [error, setError] = useState(false);
-  const palette = GRADIENT_PALETTES[hashName(productName) % GRADIENT_PALETTES.length];
+  const gradient = GRADIENTS[hashName(productName) % GRADIENTS.length];
 
   if (forceFallback || error || !src) {
     return (
@@ -85,7 +76,7 @@ export function ProductImage({
         productName={productName}
         collectionName={collectionName}
         className={className}
-        palette={palette}
+        gradient={gradient}
       />
     );
   }
