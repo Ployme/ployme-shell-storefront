@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { getProductsByCollection } from "@/lib/store/product-store";
 import { COLLECTIONS } from "@/lib/data/collections";
-import { ProductCard } from "@/components/shop/product-card";
+import { CollectionGrid } from "./collection-grid";
 
 type Props = {
   params: Promise<{ collection: string }>;
@@ -33,6 +33,7 @@ export default async function CollectionPage({ params }: Props) {
   }
 
   const products = await getProductsByCollection(collection.id);
+  const otherCollections = COLLECTIONS.filter((c) => c.id !== collection.id);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10 lg:py-16">
@@ -50,26 +51,44 @@ export default async function CollectionPage({ params }: Props) {
         <p className="text-[11px] font-medium uppercase tracking-[0.15em] text-terracotta">
           Collection
         </p>
-        <h1 className="mt-3 font-display text-[48px] italic leading-[1.05] tracking-tight text-foreground lg:text-[60px]">
+        <h1 className="mt-3 font-display text-[56px] italic leading-[1.05] tracking-tight text-foreground lg:text-[72px]">
           {collection.name}
         </h1>
-        <p className="mt-6 max-w-2xl text-base leading-relaxed text-muted-foreground">
+        <p className="mt-6 max-w-2xl font-display text-lg leading-relaxed text-foreground/80 lg:text-xl">
           {collection.description}
         </p>
+        <div className="mt-10 h-px bg-olive/20" />
       </div>
 
-      <div className="h-px bg-stone" />
+      {/* Sortable grid */}
+      <CollectionGrid products={products} collectionName={collection.name} />
 
-      {/* Product grid */}
-      <div className="mt-10 grid grid-cols-1 gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-        {products.map((product) => (
-          <ProductCard
-            key={product.id}
-            product={product}
-            collectionName={collection.name}
-          />
-        ))}
-      </div>
+      {/* Continue exploring */}
+      <section className="mt-24 lg:mt-32">
+        <h2 className="font-display text-2xl italic text-foreground">
+          Continue exploring
+        </h2>
+        <div className="mt-6 h-px bg-stone" />
+        <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-2">
+          {otherCollections.map((other) => (
+            <Link
+              key={other.id}
+              href={`/shop/${other.id}`}
+              className="group flex items-start justify-between py-2"
+            >
+              <div>
+                <h3 className="font-display text-[28px] italic leading-tight text-foreground transition-colors group-hover:text-olive">
+                  {other.name}
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                  {other.description}
+                </p>
+              </div>
+              <ArrowRight className="mt-2 size-4 shrink-0 text-muted-foreground transition-colors group-hover:text-foreground" />
+            </Link>
+          ))}
+        </div>
+      </section>
     </div>
   );
 }

@@ -14,9 +14,9 @@ import { useCart } from "@/lib/cart/cart-context";
 
 const navLinks = [
   { href: "/shop", label: "Shop" },
-  { href: "/shop/collections", label: "Collections" },
-  { href: "/about", label: "Our story" },
-  { href: "/journal", label: "Journal" },
+  { href: "/shop", label: "Collections" },
+  { href: "#", label: "Our story" },
+  { href: "#", label: "Journal" },
 ];
 
 export function ShopHeader() {
