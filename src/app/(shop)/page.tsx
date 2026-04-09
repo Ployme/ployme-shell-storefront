@@ -23,8 +23,8 @@ export default async function HomePage() {
   return (
     <>
       {/* ── Section 1: Hero ──────────────────────────────────── */}
-      <section className="flex min-h-[80vh] items-center">
-        <div className="mx-auto max-w-6xl px-6 py-32 lg:py-40">
+      <section>
+        <div className="mx-auto max-w-6xl px-6 pt-24 pb-16 lg:pt-32 lg:pb-20">
           <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-terracotta">
             Hand-poured olive oil, sourced carefully
           </p>

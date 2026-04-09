@@ -26,11 +26,7 @@ export const PRODUCTS: Product[] = [
       "raw fennel salad",
       "white bean bruschetta",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=1200&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=1200&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=1200&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "nf-250", size: "250ml", price: 1650, sku: "NF-250", inventory: 42 },
       { id: "nf-500", size: "500ml", price: 2800, sku: "NF-500", inventory: 28 },
@@ -222,11 +218,7 @@ export const PRODUCTS: Product[] = [
       "fried eggs",
       "warm bread — any bread",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1550411294-875dc7e3bec5?w=1200&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1550411294-875dc7e3bec5?w=1200&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1550411294-875dc7e3bec5?w=1200&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "ep-250", size: "250ml", price: 950, sku: "EP-250", inventory: 80 },
       { id: "ep-500", size: "500ml", price: 1550, sku: "EP-500", inventory: 60 },
@@ -421,11 +413,7 @@ export const PRODUCTS: Product[] = [
       "burrata with charred peppers",
       "carpaccio",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1620706857370-e1b9770e8bb1?w=1200&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1620706857370-e1b9770e8bb1?w=1200&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1620706857370-e1b9770e8bb1?w=1200&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "mir-250", size: "250ml", price: 2800, sku: "MIR-250", inventory: 18 },
     ],
