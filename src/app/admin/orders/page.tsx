@@ -1,7 +1,7 @@
 export default function OrderList() {
   return (
-    <main>
-      <h1>Order List</h1>
-    </main>
+    <div>
+      <h1 className="font-display text-4xl italic tracking-tight">Orders</h1>
+    </div>
   );
 }

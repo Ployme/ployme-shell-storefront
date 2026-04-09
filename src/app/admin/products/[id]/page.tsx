@@ -5,8 +5,8 @@ export default async function EditProduct({
 }) {
   const { id } = await params;
   return (
-    <main>
-      <h1>Edit Product: {id}</h1>
-    </main>
+    <div>
+      <h1 className="font-display text-4xl italic tracking-tight">Edit Product {id}</h1>
+    </div>
   );
 }

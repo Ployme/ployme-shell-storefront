@@ -1,7 +1,7 @@
 export default function ProductList() {
   return (
-    <main>
-      <h1>Product List</h1>
-    </main>
+    <div>
+      <h1 className="font-display text-4xl italic tracking-tight">Products</h1>
+    </div>
   );
 }

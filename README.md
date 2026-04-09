@@ -6,7 +6,7 @@ A reference storefront implementation for Ployme, an AI-powered software factory
 
 ## Stack
 
-- Next.js 15 (App Router)
+- Next.js 16 (App Router)
 - TypeScript (strict)
 - Tailwind CSS
 - shadcn/ui (New York style, installed into repo)
@@ -27,7 +27,7 @@ Open [http://localhost:3000](http://localhost:3000).
 ## Session Log
 
 1. **Session 1** — Foundation scaffolded: Next.js app, shadcn/ui, route stubs, project config.
-2. **Session 2** — Design tokens, colours, fonts, brand decisions. *(planned)*
+2. **Session 2** — Brand and design tokens: Oliveto palette, Fraunces + Instrument Sans fonts, (shop) route group, header/footer chrome, admin sidebar layout.
 3. **Session 3** — Product data, TypeScript domain types. *(planned)*
 4. **Session 4** — Page content and layouts. *(planned)*
 5. **Session 5** — Admin forms and CRUD logic. *(planned)*
