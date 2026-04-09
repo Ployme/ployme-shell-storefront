@@ -30,7 +30,7 @@ Open [http://localhost:3000](http://localhost:3000).
 2. **Session 2** — Brand and design tokens: Oliveto palette, Fraunces + Instrument Sans fonts, (shop) route group, header/footer chrome, admin sidebar layout.
 3. **Session 3** — Data layer: domain types, 18-product catalogue, collections, cart context, JSON-backed product/order stores.
 4. **Session 4** — Page content: home page, shop/collection pages, product detail, cart, checkout, order confirmation. Full end-to-end flow.
-5. **Session 5** — Admin forms and CRUD logic. *(planned)*
+5. **Session 5** — Admin panel: product list with search, product create/edit form, order list with status management, ProductImage size variants.
 6. **Session 6** — Vercel deployment and polish. *(planned)*
 
 ## Out of Scope This Weekend

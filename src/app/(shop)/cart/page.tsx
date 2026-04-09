@@ -83,6 +83,7 @@ export default function CartPage() {
                       productName={product.name}
                       collectionName={collection?.name}
                       className="size-[120px]"
+                      size="sm"
                     />
                   </div>
 

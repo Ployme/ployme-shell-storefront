@@ -29,12 +29,46 @@ function Fallback({
   collectionName,
   className,
   gradient,
+  size = "lg",
 }: {
   productName: string;
   collectionName?: string;
   className?: string;
   gradient: string;
+  size?: "lg" | "sm" | "xs";
 }) {
+  if (size === "xs") {
+    return (
+      <div
+        className={cn(
+          "relative flex items-center justify-center",
+          className
+        )}
+        style={{ background: gradient }}
+      >
+        <span className="font-display text-lg italic text-cream/80">
+          {productName.charAt(0)}
+        </span>
+      </div>
+    );
+  }
+
+  if (size === "sm") {
+    return (
+      <div
+        className={cn(
+          "relative flex items-center justify-center",
+          className
+        )}
+        style={{ background: gradient }}
+      >
+        <span className="font-display text-2xl italic text-cream/80">
+          {productName.charAt(0)}
+        </span>
+      </div>
+    );
+  }
+
   return (
     <div
       className={cn("relative flex flex-col justify-between", className)}
@@ -59,6 +93,7 @@ export function ProductImage({
   collectionName,
   forceFallback,
   className,
+  size = "lg",
 }: {
   src: string;
   alt: string;
@@ -66,6 +101,7 @@ export function ProductImage({
   collectionName?: string;
   forceFallback?: boolean;
   className?: string;
+  size?: "lg" | "sm" | "xs";
 }) {
   const [error, setError] = useState(false);
   const gradient = GRADIENTS[hashName(productName) % GRADIENTS.length];
@@ -77,6 +113,7 @@ export function ProductImage({
         collectionName={collectionName}
         className={className}
         gradient={gradient}
+        size={size}
       />
     );
   }
