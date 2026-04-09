@@ -32,34 +32,48 @@ export function ProductDetail({
     toast("Added to cart");
   }
 
+  const hasImages = product.images.length > 0;
+
   return (
     <div className="lg:grid lg:grid-cols-5 lg:gap-16">
       {/* Left column — image gallery */}
       <div className="lg:col-span-3 lg:sticky lg:top-20 lg:self-start">
         <div className="overflow-hidden rounded-sm">
-          <div className="relative aspect-[4/5] w-full">
-            {product.images.map((img, i) => (
-              <ProductImage
-                key={img}
-                src={img}
-                alt={`${product.name} — image ${i + 1}`}
-                productName={product.name}
-                className={`absolute inset-0 h-full w-full transition-opacity duration-200 ${
-                  i === primaryImageIndex
-                    ? "opacity-100"
-                    : "pointer-events-none opacity-0"
-                }`}
-              />
-            ))}
-          </div>
+          {hasImages ? (
+            <div className="relative aspect-[4/5] w-full">
+              {product.images.map((img, i) => (
+                <ProductImage
+                  key={i}
+                  src={img}
+                  alt={`${product.name} — image ${i + 1}`}
+                  productName={product.name}
+                  collectionName={collectionName}
+                  className={`absolute inset-0 h-full w-full transition-opacity duration-200 ${
+                    i === primaryImageIndex
+                      ? "opacity-100"
+                      : "pointer-events-none opacity-0"
+                  }`}
+                />
+              ))}
+            </div>
+          ) : (
+            <ProductImage
+              src=""
+              alt={product.name}
+              productName={product.name}
+              collectionName={collectionName}
+              forceFallback
+              className="aspect-[4/5] w-full"
+            />
+          )}
         </div>
 
         {/* Thumbnails */}
-        {product.images.length > 1 && (
+        {hasImages && product.images.length > 1 && (
           <div className="mt-3 flex gap-3">
             {product.images.map((img, i) => (
               <button
-                key={img}
+                key={i}
                 onClick={() => setPrimaryImageIndex(i)}
                 className={`overflow-hidden rounded-sm ${
                   i === primaryImageIndex
@@ -71,6 +85,7 @@ export function ProductDetail({
                   src={img}
                   alt={`${product.name} thumbnail ${i + 1}`}
                   productName={product.name}
+                  collectionName={collectionName}
                   className="aspect-[4/5] w-20 lg:w-24"
                 />
               </button>

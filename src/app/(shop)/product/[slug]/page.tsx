@@ -61,7 +61,7 @@ export default async function ProductPage({ params }: Props) {
           </h2>
           <div className="mt-8 grid grid-cols-1 gap-8 sm:grid-cols-3">
             {siblings.map((sibling) => (
-              <ProductCard key={sibling.id} product={sibling} />
+              <ProductCard key={sibling.id} product={sibling} collectionName={collectionName} />
             ))}
           </div>
         </section>

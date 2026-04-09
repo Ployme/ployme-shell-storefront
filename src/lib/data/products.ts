@@ -27,9 +27,9 @@ export const PRODUCTS: Product[] = [
       "white bean bruschetta",
     ],
     images: [
-      "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1519735662870-c060d79aef11?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1516100882582-96c3a05fe590?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=1200&auto=format&fit=crop&q=80",
     ],
     variants: [
       { id: "nf-250", size: "250ml", price: 1650, sku: "NF-250", inventory: 42 },
@@ -62,11 +62,7 @@ export const PRODUCTS: Product[] = [
       "grilled lamb chops",
       "fava bean purée",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1507358522600-9f71e620c44e?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1498579150354-977475b7ea0b?w=800&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "cf-250", size: "250ml", price: 1550, sku: "CF-250", inventory: 36 },
       { id: "cf-500", size: "500ml", price: 2600, sku: "CF-500", inventory: 20 },
@@ -97,11 +93,7 @@ export const PRODUCTS: Product[] = [
       "lemon-dressed lentils",
       "warm pitta with za'atar",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1471943311424-646960669fbc?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1515694346937-ed90168ca225?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "ks-250", size: "250ml", price: 1450, sku: "KS-250", inventory: 50 },
       { id: "ks-500", size: "500ml", price: 2400, sku: "KS-500", inventory: 34 },
@@ -132,11 +124,7 @@ export const PRODUCTS: Product[] = [
       "olive oil cake",
       "mozzarella and stone fruit",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1506368249639-73a05d6f6488?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=800&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "pml-250", size: "250ml", price: 1400, sku: "PML-250", inventory: 60 },
       { id: "pml-500", size: "500ml", price: 2200, sku: "PML-500", inventory: 40 },
@@ -169,9 +157,9 @@ export const PRODUCTS: Product[] = [
       "raw courgette carpaccio",
     ],
     images: [
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1510693206972-df098062cb71?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1498579150354-977475b7ea0b?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1498579150354-977475b7ea0b?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1498579150354-977475b7ea0b?w=1200&auto=format&fit=crop&q=80",
     ],
     variants: [
       { id: "tr-250", size: "250ml", price: 1750, sku: "TR-250", inventory: 24 },
@@ -204,11 +192,7 @@ export const PRODUCTS: Product[] = [
       "slow-roasted lamb shoulder",
       "grilled padron peppers",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1550411294-875dc7e3bec5?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1504544750208-dc0358e63f7f?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1533622597524-a1215e26c0a2?w=800&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "pca-250", size: "250ml", price: 1500, sku: "PCA-250", inventory: 30 },
       { id: "pca-500", size: "500ml", price: 2500, sku: "PCA-500", inventory: 22 },
@@ -243,9 +227,9 @@ export const PRODUCTS: Product[] = [
       "warm bread — any bread",
     ],
     images: [
-      "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1519735662870-c060d79aef11?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1550411294-875dc7e3bec5?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1550411294-875dc7e3bec5?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1550411294-875dc7e3bec5?w=1200&auto=format&fit=crop&q=80",
     ],
     variants: [
       { id: "ep-250", size: "250ml", price: 950, sku: "EP-250", inventory: 80 },
@@ -278,11 +262,7 @@ export const PRODUCTS: Product[] = [
       "seared tuna",
       "roasted cauliflower",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1506368249639-73a05d6f6488?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1498579150354-977475b7ea0b?w=800&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "mt-250", size: "250ml", price: 1050, sku: "MT-250", inventory: 55 },
       { id: "mt-500", size: "500ml", price: 1700, sku: "MT-500", inventory: 40 },
@@ -315,11 +295,7 @@ export const PRODUCTS: Product[] = [
       "ricotta with honey",
       "sourdough with sea salt",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1515694346937-ed90168ca225?w=800&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "sr-250", size: "250ml", price: 1100, sku: "SR-250", inventory: 45 },
       { id: "sr-500", size: "500ml", price: 1800, sku: "SR-500", inventory: 30 },
@@ -350,11 +326,7 @@ export const PRODUCTS: Product[] = [
       "steamed asparagus",
       "mayonnaise",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1550411294-875dc7e3bec5?w=800&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "cm-250", size: "250ml", price: 900, sku: "CM-250", inventory: 70 },
       { id: "cm-500", size: "500ml", price: 1450, sku: "CM-500", inventory: 50 },
@@ -386,11 +358,7 @@ export const PRODUCTS: Product[] = [
       "baked feta with tomatoes",
       "pitta and labneh",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1533622597524-a1215e26c0a2?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1471943311424-646960669fbc?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1510693206972-df098062cb71?w=800&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "gi-250", size: "250ml", price: 1000, sku: "GI-250", inventory: 55 },
       { id: "gi-500", size: "500ml", price: 1600, sku: "GI-500", inventory: 35 },
@@ -422,11 +390,7 @@ export const PRODUCTS: Product[] = [
       "mushroom risotto",
       "sourdough with aged cheese",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1504544750208-dc0358e63f7f?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1516100882582-96c3a05fe590?w=800&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "ir-250", size: "250ml", price: 1150, sku: "IR-250", inventory: 40 },
       { id: "ir-500", size: "500ml", price: 1850, sku: "IR-500", inventory: 28 },
@@ -462,9 +426,9 @@ export const PRODUCTS: Product[] = [
       "carpaccio",
     ],
     images: [
-      "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1507358522600-9f71e620c44e?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1498579150354-977475b7ea0b?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1620706857370-e1b9770e8bb1?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1620706857370-e1b9770e8bb1?w=1200&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1620706857370-e1b9770e8bb1?w=1200&auto=format&fit=crop&q=80",
     ],
     variants: [
       { id: "mir-250", size: "250ml", price: 2800, sku: "MIR-250", inventory: 18 },
@@ -496,11 +460,7 @@ export const PRODUCTS: Product[] = [
       "truffle bruschetta",
       "panzanella",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1516100882582-96c3a05fe590?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1519735662870-c060d79aef11?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=800&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "fdc-250", size: "250ml", price: 2400, sku: "FDC-250", inventory: 22 },
       { id: "fdc-500", size: "500ml", price: 3800, sku: "FDC-500", inventory: 10 },
@@ -531,11 +491,7 @@ export const PRODUCTS: Product[] = [
       "steamed mussels",
       "vanilla panna cotta",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1506368249639-73a05d6f6488?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1515694346937-ed90168ca225?w=800&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "shr-250", size: "250ml", price: 2600, sku: "SHR-250", inventory: 14 },
     ],
@@ -565,11 +521,7 @@ export const PRODUCTS: Product[] = [
       "risotto alla milanese",
       "gelato",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1510693206972-df098062cb71?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1559181567-c3190ca9959b?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "lgd-250", size: "250ml", price: 3200, sku: "LGD-250", inventory: 12 },
     ],
@@ -599,11 +551,7 @@ export const PRODUCTS: Product[] = [
       "grilled prawns",
       "chocolate mousse",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1533622597524-a1215e26c0a2?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1550411294-875dc7e3bec5?w=800&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "ap-250", size: "250ml", price: 2200, sku: "AP-250", inventory: 20 },
       { id: "ap-500", size: "500ml", price: 3600, sku: "AP-500", inventory: 8 },
@@ -635,11 +583,7 @@ export const PRODUCTS: Product[] = [
       "slow-cooked pulled pork",
       "aged pecorino",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1529692236671-f1f6cf9683ba?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1504544750208-dc0358e63f7f?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "odv-250", size: "250ml", price: 3500, sku: "ODV-250", inventory: 10 },
     ],
