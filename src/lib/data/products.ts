@@ -156,11 +156,7 @@ export const PRODUCTS: Product[] = [
       "grilled branzino",
       "raw courgette carpaccio",
     ],
-    images: [
-      "https://images.unsplash.com/photo-1498579150354-977475b7ea0b?w=1200&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1498579150354-977475b7ea0b?w=1200&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1498579150354-977475b7ea0b?w=1200&auto=format&fit=crop&q=80",
-    ],
+    images: [],
     variants: [
       { id: "tr-250", size: "250ml", price: 1750, sku: "TR-250", inventory: 24 },
       { id: "tr-500", size: "500ml", price: 2900, sku: "TR-500", inventory: 16 },
