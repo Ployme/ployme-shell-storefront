@@ -1,36 +1,97 @@
-// In-memory product store seeded from the static product catalogue.
-// Mutations live only for the lifetime of the serverless instance —
-// this is intentional. We're a reference shell, not a real backend.
-
 import "server-only";
 
 import type { Product } from "@/lib/types";
 import { PRODUCTS } from "@/lib/data/products";
 
-let products: Product[] = [...PRODUCTS];
+// ---------------------------------------------------------------------------
+// KV-backed product store with in-memory fallback
+// ---------------------------------------------------------------------------
+
+const KV_KEY = "products:all";
+
+let kvClient: import("@upstash/redis").Redis | null = null;
+let kvChecked = false;
+let fallbackProducts: Product[] | null = null;
+
+function getKV() {
+  if (kvChecked) return kvClient;
+  kvChecked = true;
+
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (url && token) {
+    // Lazy-require to avoid import errors when the package env isn't set
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Redis } = require("@upstash/redis") as typeof import("@upstash/redis");
+    kvClient = new Redis({ url, token });
+  } else {
+    console.warn(
+      "WARN: KV not configured, using in-memory store. Data will not persist across serverless instances."
+    );
+  }
+
+  return kvClient;
+}
+
+// -- helpers ----------------------------------------------------------------
+
+async function readAll(): Promise<Product[]> {
+  const kv = getKV();
+
+  if (!kv) {
+    if (!fallbackProducts) fallbackProducts = [...PRODUCTS];
+    return fallbackProducts;
+  }
+
+  const data = await kv.get<Product[]>(KV_KEY);
+  if (data) return data;
+
+  // Seed from static catalogue on first access
+  await kv.set(KV_KEY, PRODUCTS);
+  return [...PRODUCTS];
+}
+
+async function writeAll(products: Product[]): Promise<void> {
+  const kv = getKV();
+
+  if (!kv) {
+    fallbackProducts = products;
+    return;
+  }
+
+  await kv.set(KV_KEY, products);
+}
+
+// -- public API (unchanged) -------------------------------------------------
 
 export async function getAllProducts(): Promise<Product[]> {
-  return products;
+  return readAll();
 }
 
 export async function getProductBySlug(
   slug: string
 ): Promise<Product | undefined> {
+  const products = await readAll();
   return products.find((p) => p.id === slug);
 }
 
 export async function getProductsByCollection(
   collectionId: string
 ): Promise<Product[]> {
+  const products = await readAll();
   return products.filter((p) => p.collectionId === collectionId);
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
+  const products = await readAll();
   return products.filter((p) => p.featured);
 }
 
 export async function createProduct(product: Product): Promise<Product> {
+  const products = await readAll();
   products.push(product);
+  await writeAll(products);
   return product;
 }
 
@@ -38,15 +99,19 @@ export async function updateProduct(
   id: string,
   patch: Partial<Product>
 ): Promise<Product | undefined> {
+  const products = await readAll();
   const index = products.findIndex((p) => p.id === id);
   if (index === -1) return undefined;
   products[index] = { ...products[index], ...patch };
+  await writeAll(products);
   return products[index];
 }
 
 export async function deleteProduct(id: string): Promise<boolean> {
+  const products = await readAll();
   const index = products.findIndex((p) => p.id === id);
   if (index === -1) return false;
   products.splice(index, 1);
+  await writeAll(products);
   return true;
 }

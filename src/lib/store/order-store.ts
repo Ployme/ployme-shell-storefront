@@ -1,24 +1,82 @@
-// In-memory order store seeded from sample data.
-// Mutations live only for the lifetime of the serverless instance —
-// this is intentional. We're a reference shell, not a real backend.
-
 import "server-only";
 
 import type { Order, OrderStatus } from "@/lib/types";
 import { SAMPLE_ORDERS } from "@/lib/data/sample-orders";
 
-let orders: Order[] = [...SAMPLE_ORDERS];
+// ---------------------------------------------------------------------------
+// KV-backed order store with in-memory fallback
+// ---------------------------------------------------------------------------
+
+const KV_KEY = "orders:all";
+
+let kvClient: import("@upstash/redis").Redis | null = null;
+let kvChecked = false;
+let fallbackOrders: Order[] | null = null;
+
+function getKV() {
+  if (kvChecked) return kvClient;
+  kvChecked = true;
+
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  if (url && token) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { Redis } = require("@upstash/redis") as typeof import("@upstash/redis");
+    kvClient = new Redis({ url, token });
+  } else {
+    console.warn(
+      "WARN: KV not configured, using in-memory store. Data will not persist across serverless instances."
+    );
+  }
+
+  return kvClient;
+}
+
+// -- helpers ----------------------------------------------------------------
+
+async function readAll(): Promise<Order[]> {
+  const kv = getKV();
+
+  if (!kv) {
+    if (!fallbackOrders) fallbackOrders = [...SAMPLE_ORDERS];
+    return fallbackOrders;
+  }
+
+  const data = await kv.get<Order[]>(KV_KEY);
+  if (data) return data;
+
+  // Seed from sample data on first access
+  await kv.set(KV_KEY, SAMPLE_ORDERS);
+  return [...SAMPLE_ORDERS];
+}
+
+async function writeAll(orders: Order[]): Promise<void> {
+  const kv = getKV();
+
+  if (!kv) {
+    fallbackOrders = orders;
+    return;
+  }
+
+  await kv.set(KV_KEY, orders);
+}
+
+// -- public API (unchanged) -------------------------------------------------
 
 export async function getAllOrders(): Promise<Order[]> {
-  return orders;
+  return readAll();
 }
 
 export async function getOrderById(id: string): Promise<Order | undefined> {
+  const orders = await readAll();
   return orders.find((o) => o.id === id);
 }
 
 export async function createOrder(order: Order): Promise<Order> {
+  const orders = await readAll();
   orders.push(order);
+  await writeAll(orders);
   return order;
 }
 
@@ -26,8 +84,10 @@ export async function updateOrderStatus(
   id: string,
   status: OrderStatus
 ): Promise<Order | undefined> {
+  const orders = await readAll();
   const index = orders.findIndex((o) => o.id === id);
   if (index === -1) return undefined;
   orders[index] = { ...orders[index], status };
+  await writeAll(orders);
   return orders[index];
 }
