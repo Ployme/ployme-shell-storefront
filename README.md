@@ -28,7 +28,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 1. **Session 1** — Foundation scaffolded: Next.js app, shadcn/ui, route stubs, project config.
 2. **Session 2** — Brand and design tokens: Oliveto palette, Fraunces + Instrument Sans fonts, (shop) route group, header/footer chrome, admin sidebar layout.
-3. **Session 3** — Product data, TypeScript domain types. *(planned)*
+3. **Session 3** — Data layer: domain types, 18-product catalogue, collections, cart context, JSON-backed product/order stores.
 4. **Session 4** — Page content and layouts. *(planned)*
 5. **Session 5** — Admin forms and CRUD logic. *(planned)*
 6. **Session 6** — Vercel deployment and polish. *(planned)*
