@@ -17,13 +17,19 @@ function getKV() {
   if (kvChecked) return kvClient;
   kvChecked = true;
 
-  const url = process.env.UPSTASH_REDIS_REST_URL;
-  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  const redisUrl =
+    process.env.UPSTASH_REDIS_REST_URL ??
+    process.env.KV_REST_API_URL;
+  const redisToken =
+    process.env.UPSTASH_REDIS_REST_TOKEN ??
+    process.env.KV_REST_API_TOKEN;
 
-  if (url && token) {
+  if (redisUrl && redisToken) {
+    console.log('[store] using KV naming:',
+      process.env.UPSTASH_REDIS_REST_URL ? 'upstash' : 'kv');
     // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { Redis } = require("@upstash/redis") as typeof import("@upstash/redis");
-    kvClient = new Redis({ url, token });
+    kvClient = new Redis({ url: redisUrl, token: redisToken });
   } else {
     console.warn(
       "WARN: KV not configured, using in-memory store. Data will not persist across serverless instances."
