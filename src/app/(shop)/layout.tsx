@@ -2,6 +2,7 @@
 
 import { CartProvider } from "@/lib/cart/cart-context";
 import { ShopHeader } from "@/components/shop/header";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function ShopLayout({
   children,
@@ -24,6 +25,7 @@ export default function ShopLayout({
           </span>
         </div>
       </footer>
+      <Toaster position="bottom-right" />
     </CartProvider>
   );
 }
