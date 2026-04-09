@@ -9,27 +9,30 @@ import {
 } from "@/lib/store/product-store";
 import { updateOrderStatus } from "@/lib/store/order-store";
 
+function revalidateAll() {
+  revalidatePath("/", "layout");
+}
+
 export async function adminCreateProduct(product: Product) {
   await createProduct(product);
-  revalidatePath("/admin/products");
+  revalidateAll();
   return { success: true };
 }
 
 export async function adminUpdateProduct(id: string, patch: Partial<Product>) {
   const result = await updateProduct(id, patch);
-  revalidatePath("/admin/products");
-  revalidatePath(`/admin/products/${id}`);
+  revalidateAll();
   return result ? { success: true } : { success: false };
 }
 
 export async function adminDeleteProduct(id: string) {
   const result = await deleteProduct(id);
-  revalidatePath("/admin/products");
+  revalidateAll();
   return result ? { success: true } : { success: false };
 }
 
 export async function adminUpdateOrderStatus(id: string, status: OrderStatus) {
   const result = await updateOrderStatus(id, status);
-  revalidatePath("/admin/orders");
+  revalidateAll();
   return result ? { success: true } : { success: false };
 }

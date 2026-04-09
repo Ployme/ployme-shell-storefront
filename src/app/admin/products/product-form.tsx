@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import { toast } from "sonner";
+import { z } from "zod";
 import type { Product, ProductVariant, Collection } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +22,46 @@ function slugify(text: string): string {
 
 const TAGS = ["bestseller", "new", "limited", "organic"] as const;
 
+const variantSchema = z.object({
+  size: z.string().min(1, "Size is required"),
+  price: z.number().min(1, "Price must be greater than 0"),
+  inventory: z.number().min(0, "Inventory cannot be negative"),
+});
+
+const productSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  origin: z.string().min(2, "Origin is required"),
+  producer: z.string().min(1, "Producer is required"),
+  harvest: z
+    .string()
+    .min(1, "Harvest is required")
+    .regex(
+      /^[A-Z][a-z]+ \d{4}$/,
+      "Use format: Month Year (e.g. November 2025)"
+    ),
+  shortDescription: z
+    .string()
+    .min(10, "Short description must be at least 10 characters")
+    .max(200, "Short description must be under 200 characters"),
+  description: z
+    .string()
+    .min(50, "Full description must be at least 50 characters"),
+  tastingNotes: z.string().min(1, "At least one tasting note is required"),
+  pairings: z.string().min(1, "At least one pairing is required"),
+  variants: z.array(variantSchema).min(1, "At least one variant is required"),
+});
+
+type FormErrors = Partial<
+  Record<keyof z.infer<typeof productSchema>, string>
+> & {
+  variants?: string;
+};
+
+function FieldError({ message }: { message?: string }) {
+  if (!message) return null;
+  return <p className="mt-1 text-[12px] text-terracotta">{message}</p>;
+}
+
 type Props = {
   product?: Product;
   collections: Collection[];
@@ -30,6 +71,7 @@ export function ProductForm({ product, collections }: Props) {
   const router = useRouter();
   const isEdit = !!product;
   const [saving, setSaving] = useState(false);
+  const [errors, setErrors] = useState<FormErrors>({});
 
   // Basic fields
   const [name, setName] = useState(product?.name ?? "");
@@ -91,21 +133,55 @@ export function ProductForm({ product, collections }: Props) {
     });
   }
 
-  const canSave =
-    name.trim().length > 0 &&
-    origin.trim().length > 0 &&
-    variants.length > 0 &&
-    variants.every((v) => v.size.trim().length > 0 && v.price > 0);
+  function validate(): boolean {
+    const result = productSchema.safeParse({
+      name,
+      origin,
+      producer,
+      harvest,
+      shortDescription,
+      description,
+      tastingNotes,
+      pairings,
+      variants: variants.map((v) => ({
+        size: v.size,
+        price: Number(v.price),
+        inventory: Number(v.inventory),
+      })),
+    });
+
+    if (result.success) {
+      setErrors({});
+      return true;
+    }
+
+    const fieldErrors: FormErrors = {};
+    for (const issue of result.error.issues) {
+      const key = issue.path[0] as keyof FormErrors;
+      if (!fieldErrors[key]) {
+        fieldErrors[key] = issue.message;
+      }
+    }
+    setErrors(fieldErrors);
+    return false;
+  }
 
   async function handleSave() {
-    if (!canSave || saving) return;
+    if (saving) return;
+    if (!validate()) {
+      toast.error("Please fix the errors below");
+      return;
+    }
+
     setSaving(true);
 
     const slug = product?.id ?? slugify(name);
     const builtVariants = variants.map((v, i) => ({
       ...v,
       id: v.id || `${slug}-v${i}`,
-      sku: v.sku || `${slug.toUpperCase().slice(0, 6)}-${v.size}`.replace(/\s/g, ""),
+      sku:
+        v.sku ||
+        `${slug.toUpperCase().slice(0, 6)}-${v.size}`.replace(/\s/g, ""),
       price: Number(v.price),
       inventory: Number(v.inventory),
     }));
@@ -163,7 +239,9 @@ export function ProductForm({ product, collections }: Props) {
               onChange={(e) => setName(e.target.value)}
               className="mt-1.5 h-9"
               disabled={isEdit}
+              aria-invalid={!!errors.name}
             />
+            <FieldError message={errors.name} />
           </div>
           <div>
             <Label htmlFor="collection">Collection</Label>
@@ -188,7 +266,9 @@ export function ProductForm({ product, collections }: Props) {
               onChange={(e) => setOrigin(e.target.value)}
               placeholder="e.g. Castelvetrano, Sicily"
               className="mt-1.5 h-9"
+              aria-invalid={!!errors.origin}
             />
+            <FieldError message={errors.origin} />
           </div>
           <div>
             <Label htmlFor="producer">Producer</Label>
@@ -197,7 +277,9 @@ export function ProductForm({ product, collections }: Props) {
               value={producer}
               onChange={(e) => setProducer(e.target.value)}
               className="mt-1.5 h-9"
+              aria-invalid={!!errors.producer}
             />
+            <FieldError message={errors.producer} />
           </div>
           <div>
             <Label htmlFor="harvest">Harvest</Label>
@@ -207,7 +289,9 @@ export function ProductForm({ product, collections }: Props) {
               onChange={(e) => setHarvest(e.target.value)}
               placeholder="e.g. November 2025"
               className="mt-1.5 h-9"
+              aria-invalid={!!errors.harvest}
             />
+            <FieldError message={errors.harvest} />
           </div>
         </div>
       </section>
@@ -225,7 +309,9 @@ export function ProductForm({ product, collections }: Props) {
             onChange={(e) => setShortDescription(e.target.value)}
             rows={2}
             className="mt-1.5"
+            aria-invalid={!!errors.shortDescription}
           />
+          <FieldError message={errors.shortDescription} />
         </div>
         <div>
           <Label htmlFor="desc">Full description</Label>
@@ -235,7 +321,9 @@ export function ProductForm({ product, collections }: Props) {
             onChange={(e) => setDescription(e.target.value)}
             rows={5}
             className="mt-1.5"
+            aria-invalid={!!errors.description}
           />
+          <FieldError message={errors.description} />
         </div>
       </section>
 
@@ -257,7 +345,9 @@ export function ProductForm({ product, collections }: Props) {
             onChange={(e) => setTastingNotes(e.target.value)}
             placeholder="green pepper, artichoke leaf, bitter almond"
             className="mt-1.5 h-9"
+            aria-invalid={!!errors.tastingNotes}
           />
+          <FieldError message={errors.tastingNotes} />
         </div>
         <div>
           <Label htmlFor="pairings">
@@ -272,7 +362,9 @@ export function ProductForm({ product, collections }: Props) {
             onChange={(e) => setPairings(e.target.value)}
             placeholder="burrata with tomatoes, grilled swordfish"
             className="mt-1.5 h-9"
+            aria-invalid={!!errors.pairings}
           />
+          <FieldError message={errors.pairings} />
         </div>
       </section>
 
@@ -287,6 +379,7 @@ export function ProductForm({ product, collections }: Props) {
             Add variant
           </Button>
         </div>
+        <FieldError message={errors.variants} />
 
         {variants.map((variant, i) => (
           <div
@@ -363,7 +456,7 @@ export function ProductForm({ product, collections }: Props) {
 
       {/* Actions */}
       <div className="flex items-center gap-3 border-t border-stone pt-6">
-        <Button onClick={handleSave} disabled={!canSave || saving}>
+        <Button onClick={handleSave} disabled={saving}>
           {saving ? (
             <Loader2 className="size-4 animate-spin" />
           ) : isEdit ? (
