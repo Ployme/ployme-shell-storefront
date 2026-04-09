@@ -1,36 +1,41 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ployme-shell-storefront
 
-## Getting Started
+## Project Purpose
 
-First, run the development server:
+A reference storefront implementation for Ployme, an AI-powered software factory. This hand-crafted, polished commerce shell serves as both a standalone demo and in-context reference material for the Ployme engine. The vertical is an olive oil importer — chosen to demonstrate that the shell generalises across product domains. Everything runs client-side or against mocked data; there is no real backend.
+
+## Stack
+
+- Next.js 15 (App Router)
+- TypeScript (strict)
+- Tailwind CSS
+- shadcn/ui (New York style, installed into repo)
+- Radix primitives (via shadcn)
+- lucide-react (icons)
+- next/font (typography)
+- Deployed to Vercel (later)
+
+## How to Run
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Session Log
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+1. **Session 1** — Foundation scaffolded: Next.js app, shadcn/ui, route stubs, project config.
+2. **Session 2** — Design tokens, colours, fonts, brand decisions. *(planned)*
+3. **Session 3** — Product data, TypeScript domain types. *(planned)*
+4. **Session 4** — Page content and layouts. *(planned)*
+5. **Session 5** — Admin forms and CRUD logic. *(planned)*
+6. **Session 6** — Vercel deployment and polish. *(planned)*
 
-## Learn More
+## Out of Scope This Weekend
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- No real backend or API server
+- No real payment processing
+- No real authentication or authorization
+- No database — all data is mocked in-memory or in JSON files
