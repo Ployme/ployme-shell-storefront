@@ -16,7 +16,7 @@ export async function getShippingRates(
   return integrations.shipping.getRates({ destination, subtotal });
 }
 
-export async function placeOrder(order: Order): Promise<{ id: string }> {
+export async function placeOrder(order: Order): Promise<{ orderId: string }> {
   // Process payment through the payment provider
   const intent = await integrations.payment.createPaymentIntent({
     amount: order.total,
@@ -45,5 +45,5 @@ export async function placeOrder(order: Order): Promise<{ id: string }> {
     ].join("\n"),
   });
 
-  return { id: order.id };
+  return { orderId: order.id };
 }

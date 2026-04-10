@@ -108,9 +108,13 @@ export default function CheckoutPage() {
       },
     };
 
-    await placeOrder(order);
-    clearCart();
-    router.push(`/order/${orderId}`);
+    try {
+      const result = await placeOrder(order);
+      clearCart();
+      router.push(`/order/${result.orderId}`);
+    } catch {
+      setPlacing(false);
+    }
   }
 
   if (itemCount === 0 && !placing) {
