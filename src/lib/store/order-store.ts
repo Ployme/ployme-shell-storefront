@@ -7,8 +7,6 @@ import { SAMPLE_ORDERS } from "@/lib/data/sample-orders";
 // KV-backed order store with in-memory fallback
 // ---------------------------------------------------------------------------
 
-const KV_KEY = "orders:all";
-
 let kvClient: import("@upstash/redis").Redis | null = null;
 let kvChecked = false;
 let fallbackOrders: Order[] | null = null;
@@ -39,6 +37,10 @@ function getKV() {
   return kvClient;
 }
 
+const NAMESPACE = process.env.KV_NAMESPACE ?? 'oliveto';
+const ordersKey = `${NAMESPACE}:orders:all`;
+console.log('[store] active namespace:', NAMESPACE);
+
 // -- helpers ----------------------------------------------------------------
 
 async function readAll(): Promise<Order[]> {
@@ -49,11 +51,11 @@ async function readAll(): Promise<Order[]> {
     return fallbackOrders;
   }
 
-  const data = await kv.get<Order[]>(KV_KEY);
+  const data = await kv.get<Order[]>(ordersKey);
   if (data) return data;
 
   // Seed from sample data on first access
-  await kv.set(KV_KEY, SAMPLE_ORDERS);
+  await kv.set(ordersKey, SAMPLE_ORDERS);
   return [...SAMPLE_ORDERS];
 }
 
@@ -65,7 +67,7 @@ async function writeAll(orders: Order[]): Promise<void> {
     return;
   }
 
-  await kv.set(KV_KEY, orders);
+  await kv.set(ordersKey, orders);
 }
 
 // -- public API (unchanged) -------------------------------------------------

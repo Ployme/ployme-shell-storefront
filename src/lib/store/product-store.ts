@@ -7,8 +7,6 @@ import { PRODUCTS } from "@/lib/data/products";
 // KV-backed product store with in-memory fallback
 // ---------------------------------------------------------------------------
 
-const KV_KEY = "products:all";
-
 let kvClient: import("@upstash/redis").Redis | null = null;
 let kvChecked = false;
 let fallbackProducts: Product[] | null = null;
@@ -39,6 +37,10 @@ function getKV() {
   return kvClient;
 }
 
+const NAMESPACE = process.env.KV_NAMESPACE ?? 'oliveto';
+const productsKey = `${NAMESPACE}:products:all`;
+console.log('[store] active namespace:', NAMESPACE);
+
 // -- helpers ----------------------------------------------------------------
 
 async function readAll(): Promise<Product[]> {
@@ -49,11 +51,11 @@ async function readAll(): Promise<Product[]> {
     return fallbackProducts;
   }
 
-  const data = await kv.get<Product[]>(KV_KEY);
+  const data = await kv.get<Product[]>(productsKey);
   if (data) return data;
 
   // Seed from static catalogue on first access
-  await kv.set(KV_KEY, PRODUCTS);
+  await kv.set(productsKey, PRODUCTS);
   return [...PRODUCTS];
 }
 
@@ -65,7 +67,7 @@ async function writeAll(products: Product[]): Promise<void> {
     return;
   }
 
-  await kv.set(KV_KEY, products);
+  await kv.set(productsKey, products);
 }
 
 // -- public API (unchanged) -------------------------------------------------
