@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useCart } from "@/lib/cart/cart-context";
-import { resolveCartItems } from "@/lib/cart/resolve-cart-item";
 import { formatPrice } from "@/lib/types";
 import type { Order } from "@/lib/types";
 import { Input } from "@/components/ui/input";
@@ -75,7 +74,7 @@ export default function CheckoutPage() {
 
   const total = subtotal + shipping;
 
-  const { resolved: enrichedItems } = resolveCartItems(cart.items);
+  const enrichedItems = cart.items;
 
   const canSubmit =
     email.includes("@") &&
@@ -94,11 +93,7 @@ export default function CheckoutPage() {
     const order: Order = {
       id: orderId,
       customerId: "cust-001",
-      items: cart.items.map((i) => ({
-        productId: i.productId,
-        variantId: i.variantId,
-        quantity: i.quantity,
-      })),
+      items: cart.items,
       subtotal,
       shipping,
       total,
@@ -310,27 +305,24 @@ export default function CheckoutPage() {
             </p>
 
             <div className="mt-4 space-y-4">
-              {enrichedItems.map((entry) => {
-                const { item, product, variant } = entry;
-                return (
+              {enrichedItems.map((item) => (
                   <div
                     key={`${item.productId}-${item.variantId}`}
                     className="flex items-start justify-between gap-3"
                   >
                     <div className="min-w-0">
                       <p className="truncate text-sm font-medium text-foreground">
-                        {product.name}
+                        {item.snapshot.productName}
                       </p>
                       <p className="text-[12px] text-muted-foreground">
-                        {variant.size} × {item.quantity}
+                        {item.snapshot.variantSize} × {item.quantity}
                       </p>
                     </div>
                     <span className="shrink-0 text-sm tabular-nums text-foreground">
-                      {formatPrice(variant.price * item.quantity)}
+                      {formatPrice(item.snapshot.variantPrice * item.quantity)}
                     </span>
                   </div>
-                );
-              })}
+              ))}
             </div>
 
             <div className="my-5 h-px bg-stone" />

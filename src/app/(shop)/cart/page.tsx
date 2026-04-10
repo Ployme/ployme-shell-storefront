@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart/cart-context";
-import { resolveCartItems } from "@/lib/cart/resolve-cart-item";
 import { formatPrice } from "@/lib/types";
 import { ProductImage } from "@/components/shop/product-image";
 
@@ -18,8 +17,6 @@ export default function CartPage() {
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
   const total = subtotal + shipping;
   const amountToFreeShipping = FREE_SHIPPING_THRESHOLD - subtotal;
-
-  const { resolved: enrichedItems } = resolveCartItems(cart.items);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10 lg:py-16">
@@ -53,9 +50,9 @@ export default function CartPage() {
         <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-[1fr_380px]">
           {/* Left: item list */}
           <div>
-            {enrichedItems.map((entry, i) => {
-              const { item, product, variant, collection } = entry;
-              const linePrice = variant.price * item.quantity;
+            {cart.items.map((item, i) => {
+              const { snapshot } = item;
+              const linePrice = snapshot.variantPrice * item.quantity;
 
               return (
                 <div
@@ -65,10 +62,10 @@ export default function CartPage() {
                   {/* Product image */}
                   <div className="shrink-0 overflow-hidden rounded-sm">
                     <ProductImage
-                      src={product.images[0] ?? ""}
-                      alt={product.name}
-                      productName={product.name}
-                      collectionName={collection?.name}
+                      src={snapshot.image}
+                      alt={snapshot.productName}
+                      productName={snapshot.productName}
+                      collectionName={snapshot.collectionName}
                       className="size-[120px]"
                       size="sm"
                     />
@@ -78,16 +75,16 @@ export default function CartPage() {
                   <div className="flex flex-1 flex-col justify-between">
                     <div>
                       <Link
-                        href={`/product/${product.id}`}
+                        href={`/product/${snapshot.productSlug}`}
                         className="font-display text-xl italic leading-tight text-foreground transition-colors hover:text-olive"
                       >
-                        {product.name}
+                        {snapshot.productName}
                       </Link>
                       <p className="mt-1 text-[13px] text-muted-foreground">
-                        {variant.size}
+                        {snapshot.variantSize}
                       </p>
                       <p className="mt-0.5 text-[12px] text-muted-foreground">
-                        {product.origin}
+                        {snapshot.origin}
                       </p>
                     </div>
                     <p className="mt-3 text-base tabular-nums text-foreground">
@@ -123,7 +120,6 @@ export default function CartPage() {
                             item.quantity + 1
                           )
                         }
-                        disabled={item.quantity >= variant.inventory}
                         className="flex h-8 w-8 items-center justify-center text-foreground transition-colors hover:bg-stone/30 disabled:opacity-30"
                         aria-label="Increase quantity"
                       >

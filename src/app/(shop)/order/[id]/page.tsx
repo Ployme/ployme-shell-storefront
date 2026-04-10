@@ -3,7 +3,6 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Check } from "lucide-react";
 import { getOrderById } from "@/lib/store/order-store";
-import { PRODUCTS } from "@/lib/data/products";
 import { formatPrice } from "@/lib/types";
 import { integrations } from "@/lib/integrations";
 
@@ -29,16 +28,6 @@ export default async function OrderConfirmationPage({ params }: Props) {
     customer && order.customerId === customer.id
       ? customer.name.split(" ")[0]
       : "there";
-
-  const enrichedItems = order.items
-    .map((item) => {
-      const product = PRODUCTS.find((p) => p.id === item.productId);
-      if (!product) return null;
-      const variant = product.variants.find((v) => v.id === item.variantId);
-      if (!variant) return null;
-      return { item, product, variant };
-    })
-    .filter(Boolean);
 
   const addr = order.shippingAddress;
 
@@ -69,9 +58,13 @@ export default async function OrderConfirmationPage({ params }: Props) {
         </p>
 
         <div className="mt-6 space-y-4">
-          {enrichedItems.map((entry) => {
-            if (!entry) return null;
-            const { item, product, variant } = entry;
+          {order.items.map((item) => {
+            const snap = item.snapshot;
+            // Graceful fallback for legacy orders stored before
+            // the snapshot schema — show a minimal line item.
+            const name = snap?.productName ?? item.productId;
+            const size = snap?.variantSize ?? item.variantId;
+            const price = snap?.variantPrice ?? 0;
             return (
               <div
                 key={`${item.productId}-${item.variantId}`}
@@ -79,14 +72,14 @@ export default async function OrderConfirmationPage({ params }: Props) {
               >
                 <div className="min-w-0">
                   <p className="text-sm font-medium text-foreground">
-                    {product.name}
+                    {name}
                   </p>
                   <p className="text-[12px] text-muted-foreground">
-                    {variant.size} × {item.quantity}
+                    {size} × {item.quantity}
                   </p>
                 </div>
                 <span className="shrink-0 text-sm tabular-nums text-foreground">
-                  {formatPrice(variant.price * item.quantity)}
+                  {formatPrice(price * item.quantity)}
                 </span>
               </div>
             );

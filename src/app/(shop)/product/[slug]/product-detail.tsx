@@ -28,7 +28,7 @@ export function ProductDetail({
   ) as ProductVariant;
 
   function handleAddToCart() {
-    addItem(product.id, selectedVariantId, quantity);
+    addItem(product, selectedVariant, quantity);
     toast("Added to cart");
   }
 

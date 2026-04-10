@@ -8,8 +8,8 @@ import {
   useCallback,
   type ReactNode,
 } from "react";
-import type { CartItem } from "@/lib/types";
-import { resolveCartItems } from "./resolve-cart-item";
+import type { CartItem, Product, ProductVariant } from "@/lib/types";
+import { COLLECTIONS } from "@/lib/data/collections";
 
 const STORAGE_KEY = "oliveto-cart";
 
@@ -18,7 +18,7 @@ type CartState = {
 };
 
 type CartAction =
-  | { type: "ADD_ITEM"; productId: string; variantId: string; quantity: number }
+  | { type: "ADD_ITEM"; item: CartItem }
   | { type: "REMOVE_ITEM"; productId: string; variantId: string }
   | {
       type: "UPDATE_QUANTITY";
@@ -32,29 +32,21 @@ type CartAction =
 function cartReducer(state: CartState, action: CartAction): CartState {
   switch (action.type) {
     case "ADD_ITEM": {
+      const { item } = action;
       const existing = state.items.find(
         (i) =>
-          i.productId === action.productId && i.variantId === action.variantId
+          i.productId === item.productId && i.variantId === item.variantId
       );
       if (existing) {
         return {
           items: state.items.map((i) =>
-            i.productId === action.productId && i.variantId === action.variantId
-              ? { ...i, quantity: i.quantity + action.quantity }
+            i.productId === item.productId && i.variantId === item.variantId
+              ? { ...i, quantity: i.quantity + item.quantity }
               : i
           ),
         };
       }
-      return {
-        items: [
-          ...state.items,
-          {
-            productId: action.productId,
-            variantId: action.variantId,
-            quantity: action.quantity,
-          },
-        ],
-      };
+      return { items: [...state.items, item] };
     }
     case "REMOVE_ITEM":
       return {
@@ -95,7 +87,7 @@ function cartReducer(state: CartState, action: CartAction): CartState {
 
 type CartContextValue = {
   cart: CartState;
-  addItem: (productId: string, variantId: string, quantity?: number) => void;
+  addItem: (product: Product, variant: ProductVariant, quantity?: number) => void;
   removeItem: (productId: string, variantId: string) => void;
   updateQuantity: (
     productId: string,
@@ -112,14 +104,18 @@ const CartContext = createContext<CartContextValue | null>(null);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, dispatch] = useReducer(cartReducer, { items: [] });
 
-  // Hydrate from localStorage on mount
+  // Hydrate from localStorage on mount, filtering out old-schema entries
+  // that lack the snapshot field.
   useEffect(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         const parsed = JSON.parse(stored) as CartItem[];
         if (Array.isArray(parsed)) {
-          dispatch({ type: "HYDRATE", items: parsed });
+          const valid = parsed.filter(
+            (i) => i.snapshot && typeof i.snapshot.variantPrice === "number"
+          );
+          dispatch({ type: "HYDRATE", items: valid });
         }
       }
     } catch {
@@ -136,8 +132,25 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [cart.items, isHydrated]);
 
   const addItem = useCallback(
-    (productId: string, variantId: string, quantity: number = 1) => {
-      dispatch({ type: "ADD_ITEM", productId, variantId, quantity });
+    (product: Product, variant: ProductVariant, quantity: number = 1) => {
+      const collection = COLLECTIONS.find((c) => c.id === product.collectionId);
+      const item: CartItem = {
+        productId: product.id,
+        variantId: variant.id,
+        quantity,
+        snapshot: {
+          productName: product.name,
+          productSlug: product.id,
+          collectionId: product.collectionId,
+          collectionName: collection?.name ?? "",
+          origin: product.origin,
+          image: product.images[0] ?? "",
+          variantSize: variant.size,
+          variantPrice: variant.price,
+          variantSku: variant.sku,
+        },
+      };
+      dispatch({ type: "ADD_ITEM", item });
     },
     []
   );
@@ -160,22 +173,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "CLEAR" });
   }, []);
 
-  // Resolve cart items against the static product catalogue and
-  // remove any stale entries that no longer match a known product.
-  const { resolved, stale } = resolveCartItems(cart.items);
+  const itemCount = cart.items.reduce((sum, i) => sum + i.quantity, 0);
 
-  useEffect(() => {
-    if (stale.length > 0) {
-      for (const s of stale) {
-        dispatch({ type: "REMOVE_ITEM", productId: s.productId, variantId: s.variantId });
-      }
-    }
-  }, [stale.length]); // eslint-disable-line react-hooks/exhaustive-deps
-
-  const itemCount = resolved.reduce((sum, r) => sum + r.item.quantity, 0);
-
-  const subtotal = resolved.reduce(
-    (sum, r) => sum + r.variant.price * r.item.quantity,
+  const subtotal = cart.items.reduce(
+    (sum, i) => sum + i.snapshot.variantPrice * i.quantity,
     0
   );
 

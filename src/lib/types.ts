@@ -30,10 +30,23 @@ export type Product = {
   featured: boolean;
 };
 
+export type CartItemSnapshot = {
+  productName: string;
+  productSlug: string;
+  collectionId: string;
+  collectionName: string;
+  origin: string;
+  image: string;
+  variantSize: string;
+  variantPrice: number;
+  variantSku: string;
+};
+
 export type CartItem = {
   productId: string;
   variantId: string;
   quantity: number;
+  snapshot: CartItemSnapshot;
 };
 
 export type Cart = {

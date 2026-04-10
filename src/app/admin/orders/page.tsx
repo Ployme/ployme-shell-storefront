@@ -1,5 +1,4 @@
 import { getAllOrders } from "@/lib/store/order-store";
-import { PRODUCTS } from "@/lib/data/products";
 import { formatPrice } from "@/lib/types";
 import { Badge } from "@/components/ui/badge";
 import { OrderStatusSelect } from "./order-status-select";
@@ -49,12 +48,8 @@ export default async function OrderListPage() {
             {sorted.map((order) => {
               const itemSummary = order.items
                 .map((item) => {
-                  const product = PRODUCTS.find(
-                    (p) => p.id === item.productId
-                  );
-                  return product
-                    ? `${product.name} ×${item.quantity}`
-                    : `${item.productId} ×${item.quantity}`;
+                  const name = item.snapshot?.productName ?? item.productId;
+                  return `${name} ×${item.quantity}`;
                 })
                 .join(", ");
 
