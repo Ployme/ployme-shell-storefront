@@ -5,7 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useCart } from "@/lib/cart/cart-context";
-import { PRODUCTS } from "@/lib/data/products";
+import { resolveCartItems } from "@/lib/cart/resolve-cart-item";
 import { formatPrice } from "@/lib/types";
 import type { Order } from "@/lib/types";
 import { Input } from "@/components/ui/input";
@@ -75,15 +75,7 @@ export default function CheckoutPage() {
 
   const total = subtotal + shipping;
 
-  const enrichedItems = cart.items
-    .map((item) => {
-      const product = PRODUCTS.find((p) => p.id === item.productId);
-      if (!product) return null;
-      const variant = product.variants.find((v) => v.id === item.variantId);
-      if (!variant) return null;
-      return { item, product, variant };
-    })
-    .filter(Boolean);
+  const { resolved: enrichedItems } = resolveCartItems(cart.items);
 
   const canSubmit =
     email.includes("@") &&
@@ -319,7 +311,6 @@ export default function CheckoutPage() {
 
             <div className="mt-4 space-y-4">
               {enrichedItems.map((entry) => {
-                if (!entry) return null;
                 const { item, product, variant } = entry;
                 return (
                   <div

@@ -9,7 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import type { CartItem } from "@/lib/types";
-import { PRODUCTS } from "@/lib/data/products";
+import { resolveCartItems } from "./resolve-cart-item";
 
 const STORAGE_KEY = "oliveto-cart";
 
@@ -160,15 +160,24 @@ export function CartProvider({ children }: { children: ReactNode }) {
     dispatch({ type: "CLEAR" });
   }, []);
 
-  const itemCount = cart.items.reduce((sum, i) => sum + i.quantity, 0);
+  // Resolve cart items against the static product catalogue and
+  // remove any stale entries that no longer match a known product.
+  const { resolved, stale } = resolveCartItems(cart.items);
 
-  const subtotal = cart.items.reduce((sum, item) => {
-    const product = PRODUCTS.find((p) => p.id === item.productId);
-    if (!product) return sum;
-    const variant = product.variants.find((v) => v.id === item.variantId);
-    if (!variant) return sum;
-    return sum + variant.price * item.quantity;
-  }, 0);
+  useEffect(() => {
+    if (stale.length > 0) {
+      for (const s of stale) {
+        dispatch({ type: "REMOVE_ITEM", productId: s.productId, variantId: s.variantId });
+      }
+    }
+  }, [stale.length]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const itemCount = resolved.reduce((sum, r) => sum + r.item.quantity, 0);
+
+  const subtotal = resolved.reduce(
+    (sum, r) => sum + r.variant.price * r.item.quantity,
+    0
+  );
 
   return (
     <CartContext value={{ cart, addItem, removeItem, updateQuantity, clearCart, itemCount, subtotal }}>

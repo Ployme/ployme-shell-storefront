@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart/cart-context";
-import { PRODUCTS } from "@/lib/data/products";
-import { COLLECTIONS } from "@/lib/data/collections";
+import { resolveCartItems } from "@/lib/cart/resolve-cart-item";
 import { formatPrice } from "@/lib/types";
 import { ProductImage } from "@/components/shop/product-image";
 
@@ -20,18 +19,7 @@ export default function CartPage() {
   const total = subtotal + shipping;
   const amountToFreeShipping = FREE_SHIPPING_THRESHOLD - subtotal;
 
-  const enrichedItems = cart.items
-    .map((item) => {
-      const product = PRODUCTS.find((p) => p.id === item.productId);
-      if (!product) return null;
-      const variant = product.variants.find((v) => v.id === item.variantId);
-      if (!variant) return null;
-      const collection = COLLECTIONS.find(
-        (c) => c.id === product.collectionId
-      );
-      return { item, product, variant, collection };
-    })
-    .filter(Boolean);
+  const { resolved: enrichedItems } = resolveCartItems(cart.items);
 
   return (
     <div className="mx-auto max-w-6xl px-6 py-10 lg:py-16">
@@ -66,7 +54,6 @@ export default function CartPage() {
           {/* Left: item list */}
           <div>
             {enrichedItems.map((entry, i) => {
-              if (!entry) return null;
               const { item, product, variant, collection } = entry;
               const linePrice = variant.price * item.quantity;
 
