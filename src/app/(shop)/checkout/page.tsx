@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useCart } from "@/lib/cart/cart-context";
 import { formatPrice } from "@/lib/types";
@@ -19,7 +18,6 @@ const COUNTRIES = [
 ];
 
 export default function CheckoutPage() {
-  const router = useRouter();
   const { cart, subtotal, itemCount, clearCart } = useCart();
   const [placing, setPlacing] = useState(false);
 
@@ -67,10 +65,10 @@ export default function CheckoutPage() {
   }, [line1, line2, city, postcode, country, subtotal]);
 
   useEffect(() => {
-    if (loaded) {
+    if (loaded && !placing && itemCount > 0) {
       fetchShipping();
     }
-  }, [loaded, fetchShipping]);
+  }, [loaded, placing, itemCount, fetchShipping]);
 
   const total = subtotal + shipping;
 
@@ -111,8 +109,12 @@ export default function CheckoutPage() {
     try {
       const result = await placeOrder(order);
       clearCart();
-      router.push(`/order/${result.orderId}`);
-    } catch {
+      // Hard navigation to cleanly unmount checkout and its pending
+      // effects. Avoids races between client-side routing, the cart
+      // state change, and any in-flight server actions.
+      window.location.href = `/order/${result.orderId}`;
+    } catch (err) {
+      console.error('[checkout] place order failed:', err);
       setPlacing(false);
     }
   }
