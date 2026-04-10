@@ -1,20 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useCart } from "@/lib/cart/cart-context";
 import { PRODUCTS } from "@/lib/data/products";
-import { SAMPLE_CUSTOMER } from "@/lib/data/sample-customer";
 import { formatPrice } from "@/lib/types";
 import type { Order } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { placeOrder } from "./actions";
-
-const FREE_SHIPPING_THRESHOLD = 4000;
-const SHIPPING_COST = 450;
+import { placeOrder, getCustomerDefaults, getShippingRates } from "./actions";
 
 const COUNTRIES = [
   "United Kingdom",
@@ -23,23 +19,60 @@ const COUNTRIES = [
   "Italy",
 ];
 
-const defaultAddress = SAMPLE_CUSTOMER.addresses[0];
-
 export default function CheckoutPage() {
   const router = useRouter();
   const { cart, subtotal, itemCount, clearCart } = useCart();
   const [placing, setPlacing] = useState(false);
 
-  // Form state, pre-filled from sample customer
-  const [email, setEmail] = useState(SAMPLE_CUSTOMER.email);
-  const [name, setName] = useState(SAMPLE_CUSTOMER.name);
-  const [line1, setLine1] = useState(defaultAddress.line1);
-  const [line2, setLine2] = useState(defaultAddress.line2 ?? "");
-  const [city, setCity] = useState(defaultAddress.city);
-  const [postcode, setPostcode] = useState(defaultAddress.postcode);
+  // Form state — populated from auth provider on mount
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [line1, setLine1] = useState("");
+  const [line2, setLine2] = useState("");
+  const [city, setCity] = useState("");
+  const [postcode, setPostcode] = useState("");
   const [country, setCountry] = useState("United Kingdom");
+  const [loaded, setLoaded] = useState(false);
 
-  const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
+  // Shipping — populated from shipping provider
+  const [shipping, setShipping] = useState(0);
+
+  // Load customer defaults from auth provider
+  useEffect(() => {
+    getCustomerDefaults().then((customer) => {
+      if (customer) {
+        setEmail(customer.email);
+        setName(customer.name);
+        const addr = customer.addresses[0];
+        if (addr) {
+          setLine1(addr.line1);
+          setLine2(addr.line2 ?? "");
+          setCity(addr.city);
+          setPostcode(addr.postcode);
+        }
+      }
+      setLoaded(true);
+    });
+  }, []);
+
+  // Fetch shipping rates from shipping provider when inputs change
+  const fetchShipping = useCallback(async () => {
+    if (!postcode || !city) return;
+    const rates = await getShippingRates(
+      { line1, line2: line2 || undefined, city, postcode, country },
+      subtotal
+    );
+    if (rates.length > 0) {
+      setShipping(rates[0].price);
+    }
+  }, [line1, line2, city, postcode, country, subtotal]);
+
+  useEffect(() => {
+    if (loaded) {
+      fetchShipping();
+    }
+  }, [loaded, fetchShipping]);
+
   const total = subtotal + shipping;
 
   const enrichedItems = cart.items
@@ -68,7 +101,7 @@ export default function CheckoutPage() {
 
     const order: Order = {
       id: orderId,
-      customerId: SAMPLE_CUSTOMER.id,
+      customerId: "cust-001",
       items: cart.items.map((i) => ({
         productId: i.productId,
         variantId: i.variantId,
@@ -88,8 +121,6 @@ export default function CheckoutPage() {
       },
     };
 
-    // Simulated delay
-    await new Promise((resolve) => setTimeout(resolve, 750));
     await placeOrder(order);
     clearCart();
     router.push(`/order/${orderId}`);

@@ -5,6 +5,7 @@ import { Check } from "lucide-react";
 import { getOrderById } from "@/lib/store/order-store";
 import { PRODUCTS } from "@/lib/data/products";
 import { formatPrice } from "@/lib/types";
+import { integrations } from "@/lib/integrations";
 
 type Props = {
   params: Promise<{ id: string }>;
@@ -22,10 +23,12 @@ export default async function OrderConfirmationPage({ params }: Props) {
     notFound();
   }
 
-  // Our Order type doesn't store customer name directly — resolve from
-  // the sample customer for the demo. A real app would join on customerId.
+  // Resolve the customer name via the auth provider.
+  const customer = await integrations.auth.getCurrentCustomer();
   const customerFirstName =
-    order.customerId === "cust-001" ? "Elena" : "there";
+    customer && order.customerId === customer.id
+      ? customer.name.split(" ")[0]
+      : "there";
 
   const enrichedItems = order.items
     .map((item) => {

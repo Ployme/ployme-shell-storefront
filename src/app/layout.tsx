@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Instrument_Sans } from "next/font/google";
+import Script from "next/script";
+import { THIRD_PARTY_SCRIPTS } from "@/lib/integrations/third-party-scripts";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -28,7 +30,20 @@ export default function RootLayout({
       lang="en"
       className={`${fraunces.variable} ${instrumentSans.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-body">{children}</body>
+      <body className="min-h-full flex flex-col font-body">
+        {children}
+        {THIRD_PARTY_SCRIPTS.map((s) => (
+          <Script
+            key={s.id}
+            id={s.id}
+            src={s.src}
+            strategy={s.strategy ?? "afterInteractive"}
+            dangerouslySetInnerHTML={
+              s.inline ? { __html: s.inline } : undefined
+            }
+          />
+        ))}
+      </body>
     </html>
   );
 }
