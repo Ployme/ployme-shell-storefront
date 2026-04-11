@@ -2,20 +2,50 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useRef } from "react";
 import { Minus, Plus } from "lucide-react";
 import { useCart } from "@/lib/cart/cart-context";
 import { formatPrice } from "@/lib/types";
 import { ProductImage } from "@/components/shop/product-image";
+import { DiscountInput } from "@/components/shop/discount-input";
+import { restoreAbandonedCart } from "./restore-actions";
 
 const FREE_SHIPPING_THRESHOLD = 4000; // £40 in pence
 const SHIPPING_COST = 450; // £4.50
 
 export default function CartPage() {
-  const { cart, updateQuantity, removeItem, subtotal, itemCount } = useCart();
+  const {
+    cart,
+    updateQuantity,
+    removeItem,
+    subtotal,
+    itemCount,
+    discount,
+    hydrateItems,
+  } = useCart();
   const router = useRouter();
 
+  // Handle ?restore=<token> reminder links. Fetches the abandoned cart
+  // snapshot via a server action and hydrates the local cart state.
+  // Reads window.location directly to avoid triggering a CSR bailout from
+  // useSearchParams() in a statically-renderable route.
+  const restoreHandled = useRef(false);
+  useEffect(() => {
+    if (restoreHandled.current) return;
+    restoreHandled.current = true;
+    const params = new URLSearchParams(window.location.search);
+    const token = params.get("restore");
+    if (!token) return;
+    restoreAbandonedCart(token).then((items) => {
+      if (items && items.length > 0) {
+        hydrateItems(items);
+      }
+    });
+  }, [hydrateItems]);
+
   const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : SHIPPING_COST;
-  const total = subtotal + shipping;
+  const discountAmount = discount?.amount ?? 0;
+  const total = Math.max(0, subtotal - discountAmount) + shipping;
   const amountToFreeShipping = FREE_SHIPPING_THRESHOLD - subtotal;
 
   return (
@@ -154,6 +184,16 @@ export default function CartPage() {
                     {formatPrice(subtotal)}
                   </span>
                 </div>
+                {discount && (
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      Discount ({discount.code})
+                    </span>
+                    <span className="tabular-nums text-terracotta">
+                      -{formatPrice(discount.amount)}
+                    </span>
+                  </div>
+                )}
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Shipping</span>
                   <span
@@ -163,6 +203,8 @@ export default function CartPage() {
                   </span>
                 </div>
               </div>
+
+              <DiscountInput />
 
               <div className="my-5 h-px bg-stone" />
 

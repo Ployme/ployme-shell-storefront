@@ -6,6 +6,8 @@ import { getProductBySlug, getProductsByCollection } from "@/lib/store/product-s
 import { COLLECTIONS } from "@/lib/data/collections";
 import { ProductDetail } from "./product-detail";
 import { ProductCard } from "@/components/shop/product-card";
+import { ProductReviews } from "@/components/shop/product-reviews";
+import { integrations } from "@/lib/integrations";
 
 type Props = {
   params: Promise<{ slug: string }>;
@@ -40,6 +42,8 @@ export default async function ProductPage({ params }: Props) {
     .filter((p) => p.id !== product.id)
     .slice(0, 3);
 
+  const customer = await integrations.auth.getCurrentCustomer();
+
   return (
     <div className="mx-auto max-w-6xl px-6 py-10 lg:py-16">
       {/* Back link */}
@@ -52,6 +56,13 @@ export default async function ProductPage({ params }: Props) {
       </Link>
 
       <ProductDetail product={product} collectionName={collectionName} />
+
+      <ProductReviews
+        productId={product.id}
+        currentCustomer={
+          customer ? { name: customer.name, email: customer.email } : null
+        }
+      />
 
       {/* You might also like */}
       {siblings.length > 0 && (

@@ -39,6 +39,8 @@ export default async function OrderListPage() {
               <th className="hidden pb-3 pr-3 font-medium sm:table-cell">
                 Items
               </th>
+              <th className="pb-3 pr-3 font-medium">Ex VAT</th>
+              <th className="pb-3 pr-3 font-medium">VAT</th>
               <th className="pb-3 pr-3 font-medium">Total</th>
               <th className="pb-3 pr-3 font-medium">Status</th>
               <th className="pb-3 font-medium">Update</th>
@@ -75,6 +77,12 @@ export default async function OrderListPage() {
                   </td>
                   <td className="hidden max-w-[260px] truncate py-3 pr-3 text-muted-foreground sm:table-cell">
                     {itemSummary}
+                  </td>
+                  <td className="py-3 pr-3 tabular-nums text-muted-foreground">
+                    {formatPrice(order.subtotalExVat ?? order.subtotal)}
+                  </td>
+                  <td className="py-3 pr-3 tabular-nums text-muted-foreground">
+                    {formatPrice(order.vatAmount ?? 0)}
                   </td>
                   <td className="py-3 pr-3 tabular-nums text-foreground">
                     {formatPrice(order.total)}

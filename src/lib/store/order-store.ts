@@ -99,3 +99,24 @@ export async function updateOrderStatus(
   await writeAll(orders);
   return orders[index];
 }
+
+export async function getOrdersForCustomer(
+  customerId: string,
+  email?: string
+): Promise<Order[]> {
+  const orders = await readAll();
+  const lower = email?.toLowerCase();
+  return orders.filter(
+    (o) =>
+      o.customerId === customerId ||
+      (lower && o.customerEmail && o.customerEmail.toLowerCase() === lower)
+  );
+}
+
+export async function getOrdersByEmail(email: string): Promise<Order[]> {
+  const orders = await readAll();
+  const lower = email.toLowerCase();
+  return orders.filter(
+    (o) => o.customerEmail && o.customerEmail.toLowerCase() === lower
+  );
+}

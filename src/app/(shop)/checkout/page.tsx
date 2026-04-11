@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { Loader2 } from "lucide-react";
 import { useCart } from "@/lib/cart/cart-context";
@@ -8,7 +8,13 @@ import { formatPrice } from "@/lib/types";
 import type { Order } from "@/lib/types";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { placeOrder, getCustomerDefaults, getShippingRates } from "./actions";
+import {
+  placeOrder,
+  getCustomerDefaults,
+  getShippingRates,
+  computeTotals,
+} from "./actions";
+import { captureAbandonment } from "./abandonment-actions";
 
 const COUNTRIES = [
   "United Kingdom",
@@ -18,7 +24,7 @@ const COUNTRIES = [
 ];
 
 export default function CheckoutPage() {
-  const { cart, subtotal, itemCount, clearCart } = useCart();
+  const { cart, subtotal, itemCount, clearCart, discount } = useCart();
   const [placing, setPlacing] = useState(false);
 
   // Form state — populated from auth provider on mount
@@ -30,14 +36,31 @@ export default function CheckoutPage() {
   const [postcode, setPostcode] = useState("");
   const [country, setCountry] = useState("United Kingdom");
   const [loaded, setLoaded] = useState(false);
+  const [signedIn, setSignedIn] = useState(false);
 
   // Shipping — populated from shipping provider
   const [shipping, setShipping] = useState(0);
+
+  // VAT totals from computeTotals
+  const [totals, setTotals] = useState<{
+    subtotalExVat: number;
+    vatAmount: number;
+    vatRate: number;
+    discountAmount: number;
+    total: number;
+  }>({
+    subtotalExVat: subtotal,
+    vatAmount: 0,
+    vatRate: 0.20,
+    discountAmount: discount?.amount ?? 0,
+    total: subtotal,
+  });
 
   // Load customer defaults from auth provider
   useEffect(() => {
     getCustomerDefaults().then((customer) => {
       if (customer) {
+        setSignedIn(true);
         setEmail(customer.email);
         setName(customer.name);
         const addr = customer.addresses[0];
@@ -66,13 +89,53 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     if (loaded && !placing && itemCount > 0) {
+      // fetchShipping is async and calls setState inside its promise — the
+      // lint rule flags any function call that transitively sets state, but
+      // this is the intended shipping-rate refresh pattern.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       fetchShipping();
     }
   }, [loaded, placing, itemCount, fetchShipping]);
 
-  const total = subtotal + shipping;
+  // Recompute VAT + discount totals whenever relevant inputs change
+  useEffect(() => {
+    if (!loaded) return;
+    let cancelled = false;
+    computeTotals({
+      subtotal,
+      shipping,
+      country,
+      discountCode: discount?.code,
+      email: email || undefined,
+    }).then((t) => {
+      if (!cancelled) setTotals(t);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [loaded, subtotal, shipping, country, discount?.code, email]);
 
-  const enrichedItems = cart.items;
+  // Abandoned-cart capture: after email is entered, wait 15 minutes and
+  // if the order hasn't been placed, record an abandonment via the store.
+  const abandonmentArmed = useRef(false);
+  useEffect(() => {
+    if (!email || !email.includes("@") || itemCount === 0) return;
+    if (abandonmentArmed.current) return;
+    abandonmentArmed.current = true;
+    const timer = setTimeout(
+      () => {
+        if (!placing) {
+          captureAbandonment({
+            email,
+            items: cart.items,
+            subtotal,
+          }).catch(() => {});
+        }
+      },
+      15 * 60 * 1000
+    );
+    return () => clearTimeout(timer);
+  }, [email, itemCount, placing, cart.items, subtotal]);
 
   const canSubmit =
     email.includes("@") &&
@@ -87,14 +150,21 @@ export default function CheckoutPage() {
     setPlacing(true);
 
     const orderId = `ORD-${Date.now().toString(36).toUpperCase()}`;
+    const customer = await getCustomerDefaults();
 
     const order: Order = {
       id: orderId,
-      customerId: "cust-001",
+      customerId: customer?.id ?? "guest",
+      customerEmail: email,
       items: cart.items,
       subtotal,
+      subtotalExVat: totals.subtotalExVat,
+      vatAmount: totals.vatAmount,
+      vatRate: totals.vatRate,
+      discountAmount: totals.discountAmount || undefined,
+      discountCode: discount?.code,
       shipping,
-      total,
+      total: totals.total,
       status: "confirmed",
       createdAt: new Date().toISOString(),
       shippingAddress: {
@@ -107,14 +177,14 @@ export default function CheckoutPage() {
     };
 
     try {
-      const result = await placeOrder(order);
+      const result = await placeOrder({
+        order,
+        discountCode: discount?.code,
+      });
       clearCart();
-      // Hard navigation to cleanly unmount checkout and its pending
-      // effects. Avoids races between client-side routing, the cart
-      // state change, and any in-flight server actions.
       window.location.href = `/order/${result.orderId}`;
     } catch (err) {
-      console.error('[checkout] place order failed:', err);
+      console.error("[checkout] place order failed:", err);
       setPlacing(false);
     }
   }
@@ -149,6 +219,19 @@ export default function CheckoutPage() {
       <h1 className="mt-3 font-display text-[40px] italic leading-[1.05] tracking-tight text-foreground lg:text-[48px]">
         Almost there
       </h1>
+
+      {!signedIn && loaded && (
+        <p className="mt-4 text-sm text-muted-foreground">
+          Have an account?{" "}
+          <Link
+            href="/account/signin?redirect=/checkout"
+            className="text-olive underline underline-offset-2"
+          >
+            Sign in
+          </Link>{" "}
+          for faster checkout.
+        </p>
+      )}
 
       <div className="mt-12 grid grid-cols-1 gap-12 lg:grid-cols-[1fr_400px]">
         {/* Left: form */}
@@ -311,35 +394,66 @@ export default function CheckoutPage() {
             </p>
 
             <div className="mt-4 space-y-4">
-              {enrichedItems.map((item) => (
-                  <div
-                    key={`${item.productId}-${item.variantId}`}
-                    className="flex items-start justify-between gap-3"
-                  >
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-foreground">
-                        {item.snapshot.productName}
-                      </p>
-                      <p className="text-[12px] text-muted-foreground">
-                        {item.snapshot.variantSize} × {item.quantity}
-                      </p>
-                    </div>
-                    <span className="shrink-0 text-sm tabular-nums text-foreground">
-                      {formatPrice(item.snapshot.variantPrice * item.quantity)}
-                    </span>
+              {cart.items.map((item) => (
+                <div
+                  key={`${item.productId}-${item.variantId}`}
+                  className="flex items-start justify-between gap-3"
+                >
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-foreground">
+                      {item.snapshot.productName}
+                    </p>
+                    <p className="text-[12px] text-muted-foreground">
+                      {item.snapshot.variantSize} × {item.quantity}
+                    </p>
                   </div>
+                  <span className="shrink-0 text-sm tabular-nums text-foreground">
+                    {formatPrice(item.snapshot.variantPrice * item.quantity)}
+                  </span>
+                </div>
               ))}
             </div>
 
             <div className="my-5 h-px bg-stone" />
 
             <div className="space-y-3 text-sm">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Subtotal</span>
-                <span className="tabular-nums text-foreground">
-                  {formatPrice(subtotal)}
-                </span>
-              </div>
+              {totals.vatAmount > 0 ? (
+                <>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      Subtotal (ex VAT)
+                    </span>
+                    <span className="tabular-nums text-foreground">
+                      {formatPrice(totals.subtotalExVat)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">
+                      VAT ({Math.round(totals.vatRate * 100)}%)
+                    </span>
+                    <span className="tabular-nums text-foreground">
+                      {formatPrice(totals.vatAmount)}
+                    </span>
+                  </div>
+                </>
+              ) : (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className="tabular-nums text-foreground">
+                    {formatPrice(subtotal)}
+                  </span>
+                </div>
+              )}
+              {totals.discountAmount > 0 && (
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">
+                    Discount{discount ? ` (${discount.code})` : ""}
+                  </span>
+                  <span className="tabular-nums text-terracotta">
+                    -{formatPrice(totals.discountAmount)}
+                  </span>
+                </div>
+              )}
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Shipping</span>
                 <span
@@ -357,7 +471,7 @@ export default function CheckoutPage() {
                 Total
               </span>
               <span className="font-display text-lg italic tabular-nums text-foreground">
-                {formatPrice(total)}
+                {formatPrice(totals.total)}
               </span>
             </div>
           </div>

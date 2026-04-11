@@ -4,10 +4,12 @@ import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 import { toast } from "sonner";
 import type { Product, ProductVariant } from "@/lib/types";
-import { formatPrice } from "@/lib/types";
+import { formatPrice, getProductWeight, isSoldOut } from "@/lib/types";
 import { useCart } from "@/lib/cart/cart-context";
 import { Badge } from "@/components/ui/badge";
 import { ProductImage } from "@/components/shop/product-image";
+import { ShippingEstimate } from "@/components/shop/shipping-estimate";
+import { StockAlertForm } from "@/components/shop/stock-alert-form";
 
 export function ProductDetail({
   product,
@@ -220,20 +222,35 @@ export function ProductDetail({
           </div>
         </div>
 
-        {/* Add to cart */}
-        <button
-          onClick={handleAddToCart}
-          className="mt-8 flex h-14 w-full max-w-[400px] items-center justify-center rounded-sm bg-olive text-[12px] font-medium uppercase tracking-[0.15em] text-cream transition-transform active:scale-[0.97] duration-100"
-        >
-          Add to cart — {formatPrice(selectedVariant.price * quantity)}
-        </button>
+        {/* Add to cart OR stock alert */}
+        {isSoldOut(product) ? (
+          <div className="mt-8 max-w-[400px]">
+            <StockAlertForm product={product} />
+          </div>
+        ) : (
+          <>
+            <button
+              onClick={handleAddToCart}
+              disabled={selectedVariant.inventory <= 0}
+              className="mt-8 flex h-14 w-full max-w-[400px] items-center justify-center rounded-sm bg-olive text-[12px] font-medium uppercase tracking-[0.15em] text-cream transition-transform active:scale-[0.97] duration-100 disabled:opacity-50"
+            >
+              {selectedVariant.inventory <= 0
+                ? "Sold out"
+                : `Add to cart — ${formatPrice(selectedVariant.price * quantity)}`}
+            </button>
 
-        {/* Inventory hint */}
-        {selectedVariant.inventory < 20 && (
-          <p className="mt-3 text-xs text-muted-foreground">
-            {selectedVariant.inventory} in stock
-          </p>
+            {/* Inventory hint */}
+            {selectedVariant.inventory > 0 && selectedVariant.inventory < 20 && (
+              <p className="mt-3 text-xs text-muted-foreground">
+                {selectedVariant.inventory} in stock
+              </p>
+            )}
+          </>
         )}
+
+        <div className="mt-6 max-w-[400px]">
+          <ShippingEstimate weight={getProductWeight(product)} />
+        </div>
 
         {/* Reassurance */}
         <p className="mt-4 text-[11px] text-muted-foreground">

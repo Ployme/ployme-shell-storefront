@@ -2,7 +2,18 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Package, ClipboardList, Settings, Menu, LogOut } from "lucide-react";
+import {
+  Package,
+  ClipboardList,
+  Settings,
+  Menu,
+  LogOut,
+  Tag,
+  Bell,
+  RotateCcw,
+  MessageSquare,
+  ShoppingBag,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -16,6 +27,11 @@ import { cn } from "@/lib/utils";
 const adminLinks = [
   { href: "/admin/products", label: "Products", icon: Package },
   { href: "/admin/orders", label: "Orders", icon: ClipboardList },
+  { href: "/admin/discounts", label: "Discounts", icon: Tag },
+  { href: "/admin/stock-alerts", label: "Stock alerts", icon: Bell },
+  { href: "/admin/returns", label: "Returns", icon: RotateCcw },
+  { href: "/admin/reviews", label: "Reviews", icon: MessageSquare },
+  { href: "/admin/abandoned-carts", label: "Abandoned carts", icon: ShoppingBag },
   { href: "/admin/settings", label: "Settings", icon: Settings },
 ];
 

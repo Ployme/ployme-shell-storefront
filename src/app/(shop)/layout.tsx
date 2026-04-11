@@ -1,5 +1,3 @@
-"use client";
-
 import { CartProvider } from "@/lib/cart/cart-context";
 import { ShopHeader } from "@/components/shop/header";
 import { Toaster } from "@/components/ui/sonner";
@@ -11,6 +9,7 @@ export default function ShopLayout({
 }) {
   return (
     <CartProvider>
+      {/* Server component — reads the auth provider to render correct state */}
       <ShopHeader />
 
       <main className="flex-1">{children}</main>

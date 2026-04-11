@@ -28,6 +28,12 @@ export type Product = {
   variants: ProductVariant[];
   tags: ("bestseller" | "new" | "limited" | "organic")[];
   featured: boolean;
+  /** Per-unit shipping weight in grams. Defaults to 500g when unset. */
+  weight?: number;
+  /** VAT rate applied at checkout when shipping to a VAT-charging region.
+   *  Defaults to 0.20 (UK standard rate). Stored at product level so bundles
+   *  or non-standard goods can override. */
+  vatRate?: number;
 };
 
 export type CartItemSnapshot = {
@@ -79,9 +85,19 @@ export type OrderStatus =
 export type Order = {
   id: string;
   customerId: string;
+  customerEmail?: string;
   items: CartItem[];
   subtotal: number;
   shipping: number;
+  /** Subtotal excluding VAT, in pence. Older orders may not have this. */
+  subtotalExVat?: number;
+  /** VAT amount in pence. */
+  vatAmount?: number;
+  /** Decimal VAT rate applied (e.g. 0.20 for UK standard). */
+  vatRate?: number;
+  /** Discount applied in pence (positive number, already subtracted from total). */
+  discountAmount?: number;
+  discountCode?: string;
   total: number;
   status: OrderStatus;
   createdAt: string;
@@ -95,4 +111,12 @@ export function formatPrice(pence: number): string {
 
 export function getVariantLabel(variant: ProductVariant): string {
   return `${variant.size} — ${formatPrice(variant.price)}`;
+}
+
+export function isSoldOut(product: Product): boolean {
+  return product.variants.every((v) => v.inventory <= 0);
+}
+
+export function getProductWeight(product: Product): number {
+  return product.weight ?? 500;
 }

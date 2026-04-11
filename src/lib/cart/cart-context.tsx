@@ -6,12 +6,21 @@ import {
   useReducer,
   useEffect,
   useCallback,
+  useState,
   type ReactNode,
 } from "react";
 import type { CartItem, Product, ProductVariant } from "@/lib/types";
 import { COLLECTIONS } from "@/lib/data/collections";
 
 const STORAGE_KEY = "oliveto-cart";
+const DISCOUNT_STORAGE_KEY = "oliveto-discount";
+
+export type AppliedDiscount = {
+  code: string;
+  amount: number; // pence
+  type: "percentage" | "fixed";
+  value: number;
+};
 
 type CartState = {
   items: CartItem[];
@@ -95,14 +104,19 @@ type CartContextValue = {
     quantity: number
   ) => void;
   clearCart: () => void;
+  hydrateItems: (items: CartItem[]) => void;
   itemCount: number;
   subtotal: number;
+  discount: AppliedDiscount | null;
+  applyDiscount: (discount: AppliedDiscount) => void;
+  removeDiscount: () => void;
 };
 
 const CartContext = createContext<CartContextValue | null>(null);
 
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, dispatch] = useReducer(cartReducer, { items: [] });
+  const [discount, setDiscount] = useState<AppliedDiscount | null>(null);
 
   // Hydrate from localStorage on mount, filtering out old-schema entries
   // that lack the snapshot field.
@@ -118,6 +132,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
           dispatch({ type: "HYDRATE", items: valid });
         }
       }
+      const discStored = localStorage.getItem(DISCOUNT_STORAGE_KEY);
+      if (discStored) {
+        // Hydrating from localStorage on mount — a legitimate setState-in-effect.
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setDiscount(JSON.parse(discStored) as AppliedDiscount);
+      }
     } catch {
       // Corrupted localStorage — start fresh
     }
@@ -130,6 +150,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(cart.items));
     }
   }, [cart.items, isHydrated]);
+
+  useEffect(() => {
+    if (!isHydrated) return;
+    if (discount) {
+      localStorage.setItem(DISCOUNT_STORAGE_KEY, JSON.stringify(discount));
+    } else {
+      localStorage.removeItem(DISCOUNT_STORAGE_KEY);
+    }
+  }, [discount, isHydrated]);
 
   const addItem = useCallback(
     (product: Product, variant: ProductVariant, quantity: number = 1) => {
@@ -171,6 +200,19 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const clearCart = useCallback(() => {
     dispatch({ type: "CLEAR" });
+    setDiscount(null);
+  }, []);
+
+  const hydrateItems = useCallback((items: CartItem[]) => {
+    dispatch({ type: "HYDRATE", items });
+  }, []);
+
+  const applyDiscount = useCallback((d: AppliedDiscount) => {
+    setDiscount(d);
+  }, []);
+
+  const removeDiscount = useCallback(() => {
+    setDiscount(null);
   }, []);
 
   const itemCount = cart.items.reduce((sum, i) => sum + i.quantity, 0);
@@ -181,7 +223,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <CartContext value={{ cart, addItem, removeItem, updateQuantity, clearCart, itemCount, subtotal }}>
+    <CartContext
+      value={{
+        cart,
+        addItem,
+        removeItem,
+        updateQuantity,
+        clearCart,
+        hydrateItems,
+        itemCount,
+        subtotal,
+        discount,
+        applyDiscount,
+        removeDiscount,
+      }}
+    >
       {children}
     </CartContext>
   );
